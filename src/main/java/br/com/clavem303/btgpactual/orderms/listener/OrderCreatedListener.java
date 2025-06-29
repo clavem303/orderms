@@ -1,6 +1,7 @@
 package br.com.clavem303.btgpactual.orderms.listener;
 
 import br.com.clavem303.btgpactual.orderms.dto.OrderCreatedEvent;
+import br.com.clavem303.btgpactual.orderms.service.OrderService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.amqp.core.Declarable;
@@ -17,9 +18,16 @@ public class OrderCreatedListener {
 
     private final Logger logger = LoggerFactory.getLogger(OrderCreatedListener.class);
 
+    private final OrderService orderService;
+
+    public OrderCreatedListener(OrderService orderService) {
+        this.orderService = orderService;
+    }
+
     @RabbitListener(queues = ORDER_CREATED_QUEUE)
     public void listen(Message<OrderCreatedEvent> message){
         logger.info("Received order created event: {}", message.getPayload());
+        orderService.save(message.getPayload());
     }
 
     @Bean
